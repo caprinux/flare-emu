@@ -342,7 +342,7 @@ class EmuHelper():
                     "endAddr": endAddr, "callHook": callHook, "hookApis": hookApis, "count": count}
         if hookData:
             userData.update(hookData)
-        if userData["funcEnd"] is None:
+        if userData["endAddr"]:
             userData["funcEnd"] = userData["endAddr"]
         mu = self.uc
         self._prepEmuContext(registers, stack)
@@ -2216,4 +2216,5 @@ class EmuHelper():
 
                 self.writeEmuMem(self.getRegVal("sp") + i *
                              self.size_pointer, struct.pack(self.pack_fmt, val))
+
 
