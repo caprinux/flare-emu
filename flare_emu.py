@@ -230,9 +230,6 @@ class AnalysisHelper(object):
     def setComment(self, addr, comment):
         pass
 
-    def getPrevInsnAddr(self, addr):
-        pass
-
 
 class EmuHelper():
     def __init__(self, verbose=0, emuHelper=None, samplePath=None, isRizin=False):
@@ -2228,6 +2225,7 @@ class EmuHelper():
 
                 self.writeEmuMem(self.getRegVal("sp") + i *
                              self.size_pointer, struct.pack(self.pack_fmt, val))
+
 
 
 
