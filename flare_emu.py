@@ -357,9 +357,9 @@ class EmuHelper():
             # since we have no codehook to check for endAddr, we will prioritize endAddr
             if userData["endAddr"]:
                 userData["funcEnd"] = userData["endAddr"]
-            # if we automatically calculate endAddr, we will have to stop before retn
+            # if we automatically calculate endAddr, we will have to stop on retn
             else:
-                userData["funcEnd"] = self.analysisHelper.getPrevInsnAddr(userData["funcEnd"])
+                userData["funcEnd"] = userData["funcEnd"] - 1
         else:
             self.h_codehook = mu.hook_add(
                 unicorn.UC_HOOK_CODE, self._emulateRangeCodeHook, userData)
@@ -2228,6 +2228,7 @@ class EmuHelper():
 
                 self.writeEmuMem(self.getRegVal("sp") + i *
                              self.size_pointer, struct.pack(self.pack_fmt, val))
+
 
 
 
