@@ -358,7 +358,7 @@ class EmuHelper():
             if userData["endAddr"]:
                 userData["funcEnd"] = userData["endAddr"]
             # if we automatically calculate endAddr, we will have to stop before retn
-            elif:
+            else:
                 userData["funcEnd"] = self.analysisHelper.getPrevInsnAddr(userData["funcEnd"])
         else:
             self.h_codehook = mu.hook_add(
@@ -2228,6 +2228,7 @@ class EmuHelper():
 
                 self.writeEmuMem(self.getRegVal("sp") + i *
                              self.size_pointer, struct.pack(self.pack_fmt, val))
+
 
 
 
