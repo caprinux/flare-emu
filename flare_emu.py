@@ -230,6 +230,9 @@ class AnalysisHelper(object):
     def setComment(self, addr, comment):
         pass
 
+    def getPrevInsnAddr(self, addr):
+        pass
+
 
 class EmuHelper():
     def __init__(self, verbose=0, emuHelper=None, samplePath=None, isRizin=False):
@@ -342,7 +345,7 @@ class EmuHelper():
                     "endAddr": endAddr, "callHook": callHook, "hookApis": hookApis, "count": count}
         if hookData:
             userData.update(hookData)
-        if userData["endAddr"]:
+        if userData["funcEnd"] is None:
             userData["funcEnd"] = userData["endAddr"]
         mu = self.uc
         self._prepEmuContext(registers, stack)
@@ -350,18 +353,27 @@ class EmuHelper():
 
         # hooking code causes significant overhead that causes emulation to run extremely slowly, we should have a param
         # to disable default codehook
-        if not fast:
+        if fast:
+            # since we have no codehook to check for endAddr, we will prioritize endAddr
+            if userData["endAddr"]:
+                userData["funcEnd"] = userData["endAddr"]
+            # if we automatically calculate endAddr, we will have to stop before retn
+            elif:
+                userData["funcEnd"] = self.analysisHelper.getPrevInsnAddr(userData["funcEnd"])
+        else:
             self.h_codehook = mu.hook_add(
                 unicorn.UC_HOOK_CODE, self._emulateRangeCodeHook, userData)
+            self.h_memhook = mu.hook_add(unicorn.UC_HOOK_MEM_READ_UNMAPPED | unicorn.UC_HOOK_MEM_WRITE_UNMAPPED |
+                unicorn.UC_HOOK_MEM_FETCH_UNMAPPED, self._hookMemInvalid, userData)
+            self.h_inthook = mu.hook_add(
+                unicorn.UC_HOOK_INTR, self._hookInterrupt, userData)
+            
         if instructionHook:
             self.h_userhook = mu.hook_add(unicorn.UC_HOOK_CODE, instructionHook, userData)
         if memAccessHook:
             self.h_memaccesshook = self.uc.hook_add(unicorn.UC_HOOK_MEM_READ | unicorn.UC_HOOK_MEM_WRITE, 
                                                     memAccessHook, userData)
-        self.h_memhook = mu.hook_add(unicorn.UC_HOOK_MEM_READ_UNMAPPED | unicorn.UC_HOOK_MEM_WRITE_UNMAPPED |
-                                     unicorn.UC_HOOK_MEM_FETCH_UNMAPPED, self._hookMemInvalid, userData)
-        self.h_inthook = mu.hook_add(
-            unicorn.UC_HOOK_INTR, self._hookInterrupt, userData)
+
         if self.arch == unicorn.UC_ARCH_ARM:
             userData["changeThumbMode"] = True
         mu.emu_start(startAddr, userData["funcEnd"], count=count)
@@ -2216,5 +2228,6 @@ class EmuHelper():
 
                 self.writeEmuMem(self.getRegVal("sp") + i *
                              self.size_pointer, struct.pack(self.pack_fmt, val))
+
 
 
