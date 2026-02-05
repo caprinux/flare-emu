@@ -1,3 +1,8 @@
+## changes made in this fork
+
+- added `fast` argument to `emulateRange` to remove code hooks to allow faster emulation for large code blocks
+- changed default behavior of `emulateRange` from `skipCalls=True` to `skipCalls=False` _(more sane default behavior for me)_
+
 <img src="resources/flare-emu_logo.jpg?raw=true " width="350"/>
 
 # [flare-emu](#flare-emu)
