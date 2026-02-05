@@ -315,7 +315,7 @@ class EmuHelper():
     #     function, care must be taken to not use key names already used by
     #     flare_emu in userData dictionary
     # skipCalls: emulator will skip over call instructions and adjust the
-    #     stack accordingly, defaults to True
+    #     stack accordingly, defaults to False (this is a more sane default)
     # emulateRange will always skip over calls to empty memory
     # callHook: callback function that will be called whenever the emulator
     #     encounters a "call" instruction. keep in mind your skipCalls value
@@ -332,7 +332,7 @@ class EmuHelper():
     # count: Value passed to unicorn's uc_emu_start to indicate max number of
     #     instructions to emulate, Defaults to 0 (all code available).
     def emulateRange(self, startAddr, endAddr=None, registers=None, stack=None, instructionHook=None, callHook=None,
-                     memAccessHook=None, hookData=None, skipCalls=True, hookApis=True, strict=True, count=0):
+                     memAccessHook=None, hookData=None, skipCalls=False, hookApis=True, strict=True, count=0, fast=False):
         if registers is None:
             registers = {}
         if stack is None:
@@ -347,8 +347,12 @@ class EmuHelper():
         mu = self.uc
         self._prepEmuContext(registers, stack)
         self.resetEmuHooks()
-        self.h_codehook = mu.hook_add(
-            unicorn.UC_HOOK_CODE, self._emulateRangeCodeHook, userData)
+
+        # hooking code causes significant overhead that causes emulation to run extremely slowly, we should have a param
+        # to disable default codehook
+        if not fast:
+            self.h_codehook = mu.hook_add(
+                unicorn.UC_HOOK_CODE, self._emulateRangeCodeHook, userData)
         if instructionHook:
             self.h_userhook = mu.hook_add(unicorn.UC_HOOK_CODE, instructionHook, userData)
         if memAccessHook:
@@ -2212,3 +2216,4 @@ class EmuHelper():
 
                 self.writeEmuMem(self.getRegVal("sp") + i *
                              self.size_pointer, struct.pack(self.pack_fmt, val))
+
