@@ -247,3 +247,6 @@ class IdaProAnalysisHelper(flare_emu.AnalysisHelper):
             return funcName
         funcName = re.sub(r"_[\d]+$", "", funcName)
         return funcName
+
+    def getPrevInsnAddr(self, addr):
+        return idautils.DecodePrecedingInstruction(addr)[0].ea
